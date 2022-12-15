@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Entity.Concrete
 {
-    public class CartItems : IEntity
+    public class Cart : IEntity
     {
-        public int CartItemId { get; set; }
         public int CartId { get; set; }
-        public int ProductId { get; set; }
+        public int UserId { get; set; }
+        public string Description { get; set; }
     }
 }
