@@ -1,6 +1,11 @@
 using Autofac.Extensions.DependencyInjection;
 using Autofac;
+using Business.Abstract;
+using Business.Concrete;
 using Business.DependencyResolvers.Autofac;
+using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework;
+using Entity.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +16,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
-builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerBuilder.RegisterModule(new AutofacBusinessModule()));
+//builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+//builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder => containerBuilder.RegisterModule(new AutofacBusinessModule()));
+
+builder.Services.AddScoped<IProductService, ProductManager>();
+builder.Services.AddScoped<ICategoryService, CategoryManager>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailManager>();
+builder.Services.AddScoped<IOrderService, OrderManager>();
+builder.Services.AddScoped<IUserService, UserManager>();
+
+builder.Services.AddScoped<IProductDal, EfProductDal>();
+builder.Services.AddScoped<ICategoryDal, EfCategoryDal>();
+builder.Services.AddScoped<IOrderDal, EfOrderDal>();
+builder.Services.AddScoped<IOrderDetailDal, EfOrderDetailDal>();
+builder.Services.AddScoped<IUserDal, EfUserDal>();
 
 var app = builder.Build();
 
