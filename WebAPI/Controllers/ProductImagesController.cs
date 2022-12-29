@@ -10,11 +10,11 @@ namespace WebAPI.Controllers
     [ApiController]
     public class ProductImagesController : ControllerBase
     {
-        //private readonly IProductImageService _productImageService;
-        //public ProductImagesController(IProductImageService productImageService)
-        //{
-        //    _productImageService = productImageService;
-        //}
+        private readonly IProductImageService _productImageService;
+        public ProductImagesController(IProductImageService productImageService)
+        {
+            _productImageService = productImageService;
+        }
 
         [HttpPost]
         public ActionResult UploadFile([FromForm] ProductImage productImage)
@@ -27,7 +27,9 @@ namespace WebAPI.Controllers
                     productImage.File.CopyTo(stream);
                 }
 
-                return Ok(new SuccessResult());
+                var result = _productImageService.Add(productImage);
+
+                return Ok(result);
             }
             catch (Exception e)
             {
