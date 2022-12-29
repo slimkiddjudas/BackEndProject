@@ -5,12 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.DataAccess;
 using Entity.Concrete;
-using Entity.DTOs;
 
 namespace DataAccess.Abstract
 {
-    public interface IProductDal : IEntityRepository<Product>
+    public interface IProductImageDal : IEntityRepository<ProductImage>
     {
-        List<ProductDetailDto> GetProductsWithDetails();
     }
 }

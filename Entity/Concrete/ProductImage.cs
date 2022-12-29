@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Entity.Concrete
 {
@@ -11,6 +12,7 @@ namespace Entity.Concrete
     {
         public int ProductImageId { get; set; }
         public int ProductId { get; set; }
-        public string ImageBase64 { get; set; }
+        public string FileName { get; set; }
+        public IFormFile File { get; set; }
     }
 }

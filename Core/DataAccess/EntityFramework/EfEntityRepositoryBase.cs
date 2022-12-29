@@ -13,7 +13,7 @@ namespace Core.DataAccess.EntityFramework
         where TEntity : class, IEntity, new() 
         where TContext : DbContext, new()
     {
-        public List<TEntity> GetAll(Expression<Func<TEntity, bool>> filter = null)
+        public virtual List<TEntity> GetAll(Expression<Func<TEntity, bool>> filter = null)
         {
             using (TContext context = new TContext())
             {
@@ -21,7 +21,7 @@ namespace Core.DataAccess.EntityFramework
             }
         }
 
-        public TEntity Get(Expression<Func<TEntity, bool>> filter)
+        public virtual TEntity Get(Expression<Func<TEntity, bool>> filter)
         {
             using (TContext context = new TContext())
             {
@@ -29,7 +29,7 @@ namespace Core.DataAccess.EntityFramework
             }
         }
 
-        public void Add(TEntity entity)
+        public virtual void Add(TEntity entity)
         {
             using (TContext context = new TContext())
             {
@@ -39,7 +39,7 @@ namespace Core.DataAccess.EntityFramework
             }
         }
 
-        public void Update(TEntity entity)
+        public virtual void Update(TEntity entity)
         {
             using (TContext context = new TContext())
             {
@@ -49,7 +49,7 @@ namespace Core.DataAccess.EntityFramework
             }
         }
 
-        public void Delete(TEntity entity)
+        public virtual void Delete(TEntity entity)
         {
             using (TContext context = new TContext())
             {
