@@ -21,6 +21,18 @@ namespace WebAPI.Controllers
             var result = _userManager.Users;
             return Ok(result);
         }
+        [HttpPost("add")]
+        public async Task<IActionResult> CreateUser(User user)
+        {
+            var result = await _userManager.CreateAsync(user,"UmutCerk31698=D");
+            return Ok(result);
+        }
+        [HttpPost("delete")]
+        public async Task<IActionResult> DeleteUser(User user)
+        {
+            var result = await _userManager.DeleteAsync(user);
+            return Ok(result);
+        }
 
     }
 }
