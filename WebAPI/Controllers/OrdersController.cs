@@ -50,5 +50,27 @@ namespace WebAPI.Controllers
 
             return BadRequest(result);
         }
+
+        [HttpGet("getbyid/{id}")]
+        public IActionResult GetById(int id)
+        {
+            var result = _orderService.GetById(id);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpGet("getwithdetails/{id}")]
+        public IActionResult GetWithDetails(int id)
+        {
+            var result = _orderService.GetOrderWithDetails(id);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }

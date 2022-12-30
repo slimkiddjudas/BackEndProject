@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.Utilities.Results;
 using Entity.Concrete;
+using Entity.DTOs;
 
 namespace Business.Abstract
 {
@@ -15,5 +16,7 @@ namespace Business.Abstract
         IResult Delete(Order order);
         IDataResult<List<Order>> GetAll();
         IDataResult<List<Order>> GetByUserId(int id);
+        IDataResult<Order> GetById(int id);
+        IDataResult<List<OrderDetailDto>> GetOrderWithDetails(int id);
     }
 }
