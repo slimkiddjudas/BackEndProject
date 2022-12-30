@@ -40,5 +40,10 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<OrderDetail>>(_orderDetailDal.GetAll());
         }
+
+        public IDataResult<List<OrderDetail>> GetByOrderId(int orderId)
+        {
+            return new SuccessDataResult<List<OrderDetail>>(_orderDetailDal.GetAll(o => o.OrderId == orderId));
+        }
     }
 }

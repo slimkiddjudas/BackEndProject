@@ -5,10 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Core.DataAccess;
 using Entity.Concrete;
+using Entity.DTOs;
 
 namespace DataAccess.Abstract
 {
     public interface IOrderDal : IEntityRepository<Order>
     {
+        List<OrderDetailDto> GetOrderWithDetails(int id);
     }
 }
