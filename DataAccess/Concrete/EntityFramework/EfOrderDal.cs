@@ -16,17 +16,36 @@ namespace DataAccess.Concrete.EntityFramework
         {
             using (ContextDb context = new ContextDb())
             {
-                var result = from order in context.Orders
-                    join orderDetail in context.OrderDetails on order.OrderId equals orderDetail.OrderId
+                //var orderDetails = context.OrderDetails.Where(od => od.OrderId == id).ToList();
+
+
+                var orderWithDetails = from orderDetail in context.OrderDetails
+                    join order in context.Orders on orderDetail.OrderId equals order.OrderId
                     join product in context.Products on orderDetail.ProductId equals product.ProductId
-                    where order.OrderId == id
+                    where orderDetail.OrderId == id
                     select new OrderDetailDto
                     {
                         ProductName = product.ProductName,
+                        ProductDescription = product.Description,
                         Quantity = orderDetail.Quantity,
-                        UnitPrice = product.UnitPrice
+                        UnitPrice = product.UnitPrice,
+                        File = null,
+                        OrderDate = order.OrderDate
                     };
-                return result.ToList();
+                return orderWithDetails.ToList();
+                //var result = from order in context.Orders
+                //    join orderDetail in context.OrderDetails on order.OrderId equals orderDetail.OrderId
+                //    join product in context.Products on orderDetail.ProductId equals product.ProductId
+                //    where order.OrderId == id
+                //    select new OrderDetailDto
+                //    {
+                //        ProductName = product.ProductName,
+                //        ProductDescription = product.Description,
+                //        Quantity = orderDetail.Quantity,
+                //        UnitPrice = product.UnitPrice,
+                //        File = null,
+                //        OrderDate = order.OrderDate,
+                //    };
             }
         }
     }
