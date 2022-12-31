@@ -22,5 +22,6 @@ namespace DataAccess.Concrete.EntityFramework
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Campaign> Campaigns { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ApplicationUserTokens> ApplicationUserTokens { get; set; }
     }
 }
