@@ -36,14 +36,96 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("delete")]
-        public async Task<IActionResult> DeleteUser(User user)
+        public async Task<IActionResult> DeleteUser(string id)
         {
+            var user = _context.Users.Where(u => u.Id == id).ToList()[0];
             var result = await _userManager.DeleteAsync(user);
             return Ok(result);
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        [HttpPost("registerAdmin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
+        {
+            ResponseModel responseModel = new ResponseModel();
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    responseModel.Status = false;
+                    responseModel.Message = "Try Again.";
+
+                    return BadRequest(responseModel);
+                }
+
+                User existsUser = await _userManager.FindByEmailAsync(model.Email);
+
+                if (existsUser != null)
+                {
+                    responseModel.Status = false;
+                    responseModel.Message = "This user already exists.";
+
+                    return BadRequest(responseModel);
+                }
+
+                User user = new User();
+
+                user.UserName = model.UserName;
+                user.Email = model.Email;
+                user.EmailConfirmed = true;
+                user.FirstName = model.FirstName;
+                user.LastName = model.LastName;
+                user.PhoneNumberConfirmed = false;
+                user.TwoFactorEnabled = false;
+                user.LockoutEnabled = true;
+                user.AccessFailedCount = 0;
+
+                var result = await _userManager.CreateAsync(user, model.Password.Trim());
+
+                if (result.Succeeded)
+                {
+                    bool roleExists1 = await _roleManager.RoleExistsAsync(_config["Roles:Admin"]);
+                    bool roleExists2 = await _roleManager.RoleExistsAsync(_config["Roles:User"]);
+
+                    if (!roleExists1)
+                    {
+                        IdentityRole role1 = new IdentityRole(_config["Roles:Admin"]);
+                        role1.NormalizedName = _config["Roles:Admin"];
+
+                        _roleManager.CreateAsync(role1).Wait();
+                    }
+                    if (!roleExists2)
+                    {
+                        IdentityRole role2 = new IdentityRole(_config["Roles:User"]);
+                        role2.NormalizedName = _config["Roles:User"];
+
+                        _roleManager.CreateAsync(role2).Wait();
+                    }
+
+                    _userManager.AddToRoleAsync(user, _config["Roles:Admin"]).Wait();
+                    _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
+
+                    return Ok(result);
+                }
+                else
+                {
+                    responseModel.Status = false;
+                    responseModel.Message = $"An error occured while user creating. {result.Errors.FirstOrDefault().Description}";
+                    return Ok(responseModel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                responseModel.Status = false;
+                responseModel.Message = ex.Message;
+
+                return BadRequest(responseModel);
+            }
+        }
+
+        [HttpPost("registerUser")]
+        public async Task<IActionResult> RegisterUser([FromBody] RegisterModel model)
         {
             ResponseModel responseModel = new ResponseModel();
 
@@ -94,39 +176,16 @@ namespace WebAPI.Controllers
                     }
 
                     _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
-                    responseModel.Status = true;
-                    responseModel.Message = "User has been created successfully.";
-                    responseModel.Email = model.Email;
-                    responseModel.UserId = user.Id;
 
-                    var authRoles = from role in _context.Roles
-                                    join userRole in _context.UserRoles
-                                    on role.Id equals userRole.RoleId
-                                    where userRole.UserId == user.Id
-                                    select new { RoleName = role.Name };
-
-                    foreach (var item in authRoles)
-                    {
-                        responseModel.Roles.Add(item.RoleName);
-                    };
-
-                    responseModel.Token = new Token()
-                    {
-                        TokenBody = from usto in _context.UserTokens
-                                    join u in _context.Users
-                                    on usto.UserId equals u.Id
-                                    where u.Id == user.Id
-                                    select new { usto.Value }.ToString()
-                        
-                    };
-
+                    return Ok(result);
                 }
                 else
                 {
                     responseModel.Status = false;
                     responseModel.Message = $"An error occured while user creating. {result.Errors.FirstOrDefault().Description}";
+                    return Ok(responseModel);
                 }
-                return Ok(responseModel);
+                
             }
             catch (Exception ex)
             {
@@ -239,10 +298,10 @@ namespace WebAPI.Controllers
             }
             else
             {
-                return Unauthorized();
+                return Unauthorized("Token already useable.");
             }
         }
-        [HttpPost]
+        [HttpPost("authMe")]
         public async Task<IActionResult> AuthMe([FromHeader] string token)
         {
             var roles = from usro in _context.UserRoles
@@ -252,6 +311,7 @@ namespace WebAPI.Controllers
                         on usro.UserId equals us.Id
                         join ro in _context.Roles
                         on usro.RoleId equals ro.Id
+                        where usro.UserId == us.Id
                         select new { Roles = ro.Name };
 
             List<string> roleList = new List<string>();
@@ -259,7 +319,6 @@ namespace WebAPI.Controllers
             foreach (var item in roles)
             {
                 roleList.Add(item.Roles);
-                Console.WriteLine(item.Roles);
             }
 
             roleList = roleList.Distinct().ToList();
