@@ -96,6 +96,19 @@ namespace WebAPI.Controllers
                     _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
                     responseModel.Status = true;
                     responseModel.Message = "User has been created successfully.";
+                    responseModel.Email = model.Email;
+                    responseModel.UserId = user.Id;
+
+                    var authRoles = from role in _context.Roles
+                                    join userRole in _context.UserRoles
+                                    on role.Id equals userRole.RoleId
+                                    where userRole.UserId == user.Id
+                                    select new { RoleName = role.Name };
+
+                    foreach (var item in authRoles)
+                    {
+                        responseModel.Roles.Add(item.RoleName);
+                    };
                 }
                 else
                 {
@@ -151,6 +164,18 @@ namespace WebAPI.Controllers
 
                 ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
 
+
+                var authRoles = from role in _context.Roles
+                                join userRole in _context.UserRoles
+                                on role.Id equals userRole.RoleId
+                                where userRole.UserId == user.Id
+                                select new { RoleName = role.Name };
+
+                foreach (var item in authRoles)
+                {
+                    responseModel.Roles.Add(item.RoleName);
+                };
+
                 responseModel.Status = true;
                 responseModel.Message = "User is Logged in.";
                 responseModel.Token = new Token()
@@ -160,6 +185,9 @@ namespace WebAPI.Controllers
                     RefreshToken = currentUser.RefreshToken,
                     RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
                 };
+                responseModel.UserId = user.Id;
+                responseModel.Email = model.Email;
+                
 
                 return Ok(responseModel);
             }
@@ -202,6 +230,43 @@ namespace WebAPI.Controllers
             {
                 return Unauthorized();
             }
+        }
+        [HttpPost]
+        public async Task<IActionResult> AuthMe([FromHeader] string token)
+        {
+            var roles = from usro in _context.UserRoles
+                        join to in _context.UserTokens
+                        on usro.UserId equals to.UserId
+                        join us in _context.Users
+                        on usro.UserId equals us.Id
+                        join ro in _context.Roles
+                        on usro.RoleId equals ro.Id
+                        select new { Roles = ro.Name };
+
+            List<string> roleList = new List<string>();
+
+            foreach (var item in roles)
+            {
+                roleList.Add(item.Roles);
+                Console.WriteLine(item.Roles);
+            }
+
+            roleList = roleList.Distinct().ToList();
+
+            var user =  from u in _context.Users
+                            join t in _context.UserTokens
+                            on u.Id equals t.UserId
+                            where t.Value == token
+                            select new 
+                                {
+                                Id = u.Id,
+                                Email = u.Email,
+                                UserName = u.UserName,
+                                FirstName = u.FirstName,
+                                LastName = u.LastName,
+                                Roles = roleList
+                                };
+            return Ok(user);
         }
     }
 }
