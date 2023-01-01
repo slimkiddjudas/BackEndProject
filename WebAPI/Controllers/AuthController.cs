@@ -109,6 +109,17 @@ namespace WebAPI.Controllers
                     {
                         responseModel.Roles.Add(item.RoleName);
                     };
+
+                    responseModel.Token = new Token()
+                    {
+                        TokenBody = from usto in _context.UserTokens
+                                    join u in _context.Users
+                                    on usto.UserId equals u.Id
+                                    where u.Id == user.Id
+                                    select new { usto.Value }.ToString()
+                        
+                    };
+
                 }
                 else
                 {
