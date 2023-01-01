@@ -2,6 +2,7 @@
 using Business.Security.Models;
 using DataAccess.Concrete.EntityFramework;
 using Entity.Concrete;
+using Entity.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -155,7 +156,9 @@ namespace WebAPI.Controllers
                 responseModel.Token = new Token()
                 {
                     TokenBody = userTokens.Value,
-                    ExpireDate = userTokens.ExpireDate
+                    ExpireDate = userTokens.ExpireDate,
+                    RefreshToken = currentUser.RefreshToken,
+                    RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
                 };
 
                 return Ok(responseModel);
@@ -169,5 +172,36 @@ namespace WebAPI.Controllers
             }
         }
 
+        [HttpGet("refreshToken")]
+        public async Task<IActionResult> RefreshToken([FromQuery] string token)
+        {
+            User currentUser = _userManager.Users.Where(u => u.RefreshToken == token).ToList()[0];
+            var accessTokenExpireDate = new DateTime(
+                currentUser.RefreshTokenExpireDate.Value.Year, 
+                currentUser.RefreshTokenExpireDate.Value.Month, 
+                currentUser.RefreshTokenExpireDate.Value.Day, 
+                currentUser.RefreshTokenExpireDate.Value.Hour, 
+                currentUser.RefreshTokenExpireDate.Value.Minute - 5, 
+                currentUser.RefreshTokenExpireDate.Value.Second);
+
+
+            if (accessTokenExpireDate < DateTime.Now  && currentUser.RefreshTokenExpireDate > DateTime.Now)
+            {
+                AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
+                ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+
+                return Ok(new Token()
+                {
+                    TokenBody = userTokens.Value,
+                    ExpireDate = userTokens.ExpireDate,
+                    RefreshToken = currentUser.RefreshToken,
+                    RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
+                });
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
     }
 }

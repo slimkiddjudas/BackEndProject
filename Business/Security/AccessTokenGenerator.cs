@@ -66,6 +66,11 @@ namespace Business.Security
             Token tokenInfo = new Token();
             tokenInfo.TokenBody = tokenString;
             tokenInfo.ExpireDate = expireDate;
+            tokenInfo.RefreshToken = Guid.NewGuid().ToString();
+
+            _user.RefreshToken = tokenInfo.RefreshToken;
+            _user.RefreshTokenExpireDate = tokenInfo.ExpireDate.AddMinutes(5);
+            _context.SaveChanges();
 
             return tokenInfo;
         }
