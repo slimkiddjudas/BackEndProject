@@ -6,6 +6,7 @@ using Entity.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace WebAPI.Controllers
 {
@@ -336,7 +337,7 @@ namespace WebAPI.Controllers
                                 LastName = u.LastName,
                                 Roles = roleList
                                 };
-            return Ok(user);
+            return Ok(user.ToList()[0]);
         }
     }
 }
