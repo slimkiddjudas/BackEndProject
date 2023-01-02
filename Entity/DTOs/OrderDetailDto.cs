@@ -13,7 +13,6 @@ namespace Entity.DTOs
         public string ProductDescription { get; set; }
         public int Quantity { get; set; }
         public double UnitPrice { get; set; }
-        public IFormFile File { get; set; }
         public DateTime OrderDate { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Core.Entities;
 using Core.Utilities.Results;
 using Entity.Concrete;
+using Entity.DTOs;
 
 namespace Business.Abstract
 {
@@ -19,5 +20,8 @@ namespace Business.Abstract
         IDataResult<Product> GetById(int id);
         IDataResult<List<Product>> GetByCategoryId(int id);
         IDataResult<List<Product>> GetByPrice(double minPrice, double maxPrice);
+        IDataResult<List<Product>> FilterWithName(string filter);
+        IDataResult<List<ProductDetailDto>> GetProductsWithDetails();
+        IDataResult<ProductDetailDto> GetOneProductWithDetails(int id);
     }
 }

@@ -13,8 +13,6 @@ namespace Entity.Concrete
     {
         public int ProductImageId { get; set; }
         public int ProductId { get; set; }
-        public string FileName { get; set; }
-        [NotMapped]
-        public IFormFile File { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

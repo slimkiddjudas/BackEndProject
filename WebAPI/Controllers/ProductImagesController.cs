@@ -16,25 +16,59 @@ namespace WebAPI.Controllers
             _productImageService = productImageService;
         }
 
-        [HttpPost]
-        public ActionResult UploadFile([FromForm] ProductImage productImage)
+        [HttpGet]
+        public IActionResult GetAllImages()
         {
-            try
+            var result = _productImageService.GetAll();
+            if (result.IsSuccess)
             {
-                string path = Path.Combine(@"C:\Users\umut\Desktop\ProductImages", productImage.FileName);
-                using (Stream stream = new FileStream(path, FileMode.Create))
-                {
-                    productImage.File.CopyTo(stream);
-                }
-
-                var result = _productImageService.Add(productImage);
-
                 return Ok(result);
             }
-            catch (Exception e)
+            return BadRequest(result);
+        }
+
+        [HttpPost("add")]
+        public IActionResult Add(ProductImage productImage)
+        {
+            var result = _productImageService.Add(productImage);
+            if (result.IsSuccess)
             {
-                return BadRequest(new ErrorResult());
+                return Ok(result);
             }
+            return BadRequest(result);
+        }
+
+        [HttpGet("getbyproductid/{id}")]
+        public IActionResult GetByProductId(int id)
+        {
+            var result = _productImageService.GetByProductId(id);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("update")]
+        public IActionResult Update(ProductImage productImage)
+        {
+            var result = _productImageService.Update(productImage);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpPost("delete")]
+        public IActionResult Delete(ProductImage productImage)
+        {
+            var result = _productImageService.Delete(productImage);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
         }
     }
 }

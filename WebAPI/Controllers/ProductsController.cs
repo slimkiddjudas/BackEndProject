@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "User")]
+    //[Authorize(Roles = "User")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -117,6 +117,39 @@ namespace WebAPI.Controllers
                 return Ok(pageResult);
             }
 
+            return BadRequest(result);
+        }
+
+        [HttpPost("filter")]
+        public IActionResult FilterWithName(string name)
+        {
+            var result = _productService.FilterWithName(name);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpGet("getproductswithdetails")]
+        public IActionResult GetProductsWithDetails()
+        {
+            var result = _productService.GetProductsWithDetails();
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpGet("getoneproductwithdetails/{id}")]
+        public IActionResult GetOneProductWithDetails(int id)
+        {
+            var result = _productService.GetOneProductWithDetails(id);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
             return BadRequest(result);
         }
     }

@@ -8,6 +8,7 @@ using Business.Abstract;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using Entity.Concrete;
+using Entity.DTOs;
 
 namespace Business.Concrete
 {
@@ -55,6 +56,21 @@ namespace Business.Concrete
         public IDataResult<List<Product>> GetByPrice(double minPrice, double maxPrice)
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.UnitPrice > minPrice && p.UnitPrice < maxPrice));
+        }
+
+        public IDataResult<List<Product>> FilterWithName(string filter)
+        {
+            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.ProductName.Contains(filter)));
+        }
+
+        public IDataResult<List<ProductDetailDto>> GetProductsWithDetails()
+        {
+            return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductsWithDetails());
+        }
+
+        public IDataResult<ProductDetailDto> GetOneProductWithDetails(int id)
+        {
+            return new SuccessDataResult<ProductDetailDto>(_productDal.GetOneProductWithDetails(id));
         }
     }
 }

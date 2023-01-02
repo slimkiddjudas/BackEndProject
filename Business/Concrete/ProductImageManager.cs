@@ -45,5 +45,10 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<ProductImage>(_productImageDal.Get(p => p.ProductImageId == id));
         }
+
+        public IDataResult<List<ProductImage>> GetByProductId(int id)
+        {
+            return new SuccessDataResult<List<ProductImage>>(_productImageDal.GetAll(p => p.ProductId == id));
+        }
     }
 }

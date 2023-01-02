@@ -18,7 +18,7 @@ namespace DataAccess.Concrete.EntityFramework
             {
                 var imagesList = from product in context.Products
                     join productImage in context.ProductImages on product.ProductId equals productImage.ProductId
-                    select productImage.File;
+                    select productImage;
                 var result = from product in context.Products
                     join category in context.Categories on product.CategoryId equals category.CategoryId
                     select new ProductDetailDto
@@ -27,9 +27,33 @@ namespace DataAccess.Concrete.EntityFramework
                         CategoryName = category.CategoryName,
                         UnitPrice = product.UnitPrice,
                         UnitsInStock = product.UnitsInStock,
-                        Images = imagesList.ToList()
+                        ImageUrls= imagesList.Where(pi => pi.ProductId == product.ProductId).ToList(),
+                        Description = product.Description
                     };
                 return result.ToList();
+            }
+        }
+
+        public ProductDetailDto GetOneProductWithDetails(int id)
+        {
+            using (ContextDb context = new ContextDb())
+            {
+                var imagesList = from productImage in context.ProductImages
+                    where productImage.ProductId == id
+                    select productImage;
+                var result = from product in context.Products
+                    join category in context.Categories on product.CategoryId equals category.CategoryId
+                    where product.ProductId == id
+                    select new ProductDetailDto
+                    {
+                        ProductName = product.ProductName,
+                        CategoryName = category.CategoryName,
+                        UnitPrice = product.UnitPrice,
+                        UnitsInStock = product.UnitsInStock,
+                        ImageUrls = imagesList.ToList(),
+                        Description = product.Description
+                    };
+                return result.ToList()[0];
             }
         }
     }

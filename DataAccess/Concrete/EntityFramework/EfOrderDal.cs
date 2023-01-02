@@ -29,7 +29,6 @@ namespace DataAccess.Concrete.EntityFramework
                         ProductDescription = product.Description,
                         Quantity = orderDetail.Quantity,
                         UnitPrice = product.UnitPrice,
-                        File = null,
                         OrderDate = order.OrderDate
                     };
                 return orderWithDetails.ToList();

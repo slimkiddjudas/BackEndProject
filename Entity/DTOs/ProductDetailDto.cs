@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Entity.Concrete;
 using Microsoft.AspNetCore.Http;
 
 namespace Entity.DTOs
@@ -13,6 +14,7 @@ namespace Entity.DTOs
         public string CategoryName { get; set; }
         public double UnitPrice { get; set; }
         public int UnitsInStock { get; set; }
-        public List<IFormFile> Images { get; set; }
+        public List<ProductImage> ImageUrls { get; set; }
+        public string Description { get; set; }
     }
 }
