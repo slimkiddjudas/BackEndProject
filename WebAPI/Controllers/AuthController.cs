@@ -301,7 +301,7 @@ namespace WebAPI.Controllers
                 return Unauthorized("Token already useable.");
             }
         }
-        [HttpPost("authMe")]
+        [HttpGet("authMe")]
         public async Task<IActionResult> AuthMe([FromHeader] string token)
         {
             var roles = from usro in _context.UserRoles
