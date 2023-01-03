@@ -8,6 +8,7 @@ using Entity.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -134,26 +135,26 @@ namespace WebAPI.Controllers
         [HttpPost("registerUser")]
         public async Task<IActionResult> RegisterUser([FromBody] RegisterModel model)
         {
-            ResponseModel responseModel = new ResponseModel();
+            RegisterResponseModel registerResponseModel = new RegisterResponseModel();
 
             try
             {
                 if (!ModelState.IsValid)
                 {
-                    responseModel.Status = false;
-                    responseModel.Message = "Try Again.";
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = "Try Again.";
 
-                    return BadRequest(responseModel);
+                    return BadRequest(registerResponseModel);
                 }
 
                 User existsUser = await _userManager.FindByEmailAsync(model.Email);
 
                 if (existsUser != null)
                 {
-                    responseModel.Status = false;
-                    responseModel.Message = "This user already exists.";
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = "This user already exists.";
 
-                    return BadRequest(responseModel);
+                    return BadRequest(registerResponseModel);
                 }
 
                 User user = new User();
@@ -184,22 +185,53 @@ namespace WebAPI.Controllers
 
                     _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
 
-                    return Ok(result);
+                    User currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+                    AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
+                    ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+
+                    var authRoles = from role in _context.Roles
+                                    join userRole in _context.UserRoles
+                                    on role.Id equals userRole.RoleId
+                                    where userRole.UserId == user.Id
+                                    select new { RoleName = role.Name };
+
+                    foreach (var item in authRoles)
+                    {
+                        registerResponseModel.Roles.Add(item.RoleName);
+                    };
+
+                    registerResponseModel.Email = user.Email;
+                    registerResponseModel.UserName = user.UserName;
+                    registerResponseModel.UserId = user.Id;
+                    registerResponseModel.Token = new Token()
+                    {
+                        TokenBody = userTokens.Value,
+                        ExpireDate = userTokens.ExpireDate,
+                        RefreshToken = currentUser.RefreshToken,
+                        RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
+                    };
+                    registerResponseModel.FirstName = user.FirstName;
+                    registerResponseModel.LastName = user.LastName;
+                    registerResponseModel.Message = "User is created successfully";
+                    registerResponseModel.Status = true;
+
+
+                    return Ok(registerResponseModel);
                 }
                 else
                 {
-                    responseModel.Status = false;
-                    responseModel.Message = $"An error occured while user creating. {result.Errors.FirstOrDefault().Description}";
-                    return Ok(responseModel);
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = $"An error occured while user creating. {result.Errors.FirstOrDefault().Description}";
+                    return Ok(registerResponseModel);
                 }
                 
             }
             catch (Exception ex)
             {
-                responseModel.Status = false;
-                responseModel.Message = ex.Message;
+                registerResponseModel.Status = false;
+                registerResponseModel.Message = ex.Message;
 
-                return BadRequest(responseModel);
+                return BadRequest(registerResponseModel);
             }
         }
 

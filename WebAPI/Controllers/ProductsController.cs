@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = "User")]
+    //[Authorize(Roles = "User")]
     [ApiController]
     public class ProductsController : ControllerBase
     {

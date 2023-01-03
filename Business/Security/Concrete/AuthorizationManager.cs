@@ -67,6 +67,7 @@ namespace Business.Security.Concrete
                 AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
 
                 ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+                currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
 
 
                 var authRoles = from role in _context.Roles
@@ -91,6 +92,9 @@ namespace Business.Security.Concrete
                 };
                 loginResponseModel.UserId = user.Id;
                 loginResponseModel.Email = loginModel.Email;
+                loginResponseModel.UserName = user.UserName;
+                loginResponseModel.FirstName = user.FirstName;
+                loginResponseModel.LastName = user.LastName;
 
 
                 return new SuccessDataResult<LoginResponseModel>(loginResponseModel);
@@ -104,13 +108,18 @@ namespace Business.Security.Concrete
             }
         }
 
+        public Task<IDataResult<LoginResponseModel>> Register(RegisterModel registerModel)
+        {
+            throw new NotImplementedException();
+        }
+
         IDataResult<AuthMeResponseModel> IAuthorizationService.AuthMe(string token)
         {
             AuthMeResponseModel authMeResponseModel = new AuthMeResponseModel();
 
             var roles = from usro in _context.UserRoles
                         join to in _context.UserTokens
-            on usro.UserId equals to.UserId
+                        on usro.UserId equals to.UserId
                         join us in _context.Users
                         on usro.UserId equals us.Id
                         join ro in _context.Roles

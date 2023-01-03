@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Business.Security.Models
 {
-    public class LoginResponseModel
+    public class RegisterResponseModel
     {
         public bool? Status { get; set; }
         public string? Message { get; set; }
