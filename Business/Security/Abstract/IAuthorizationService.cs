@@ -13,7 +13,8 @@ namespace Business.Security.Abstract
     {
         IDataResult<AuthMeResponseModel> AuthMe(string token);
         Task<IDataResult<LoginResponseModel>> Login(LoginModel loginModel);
-
-        Task<IDataResult<LoginResponseModel>> Register(RegisterModel registerModel);
+        Task<IDataResult<RegisterResponseModel>> RegisterUser(RegisterModel registerModel);
+        Task<IDataResult<RegisterResponseModel>> RegisterAdmin(RegisterModel registerModel);
+        Task<IDataResult<RefreshTokenResponseModel>> RefreshToken(string token);
     }
 }

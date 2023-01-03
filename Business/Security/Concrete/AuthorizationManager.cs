@@ -108,30 +108,279 @@ namespace Business.Security.Concrete
             }
         }
 
-        public Task<IDataResult<LoginResponseModel>> Register(RegisterModel registerModel)
+        public async Task<IDataResult<RefreshTokenResponseModel>> RefreshToken(string token)
         {
-            throw new NotImplementedException();
+            RefreshTokenResponseModel refreshTokenResponseModel = new RefreshTokenResponseModel();
+
+            User currentUser = _userManager.Users.Where(u => u.RefreshToken == token).ToList()[0];
+            var accessTokenExpireDate = new DateTime(
+                currentUser.RefreshTokenExpireDate.Value.Year,
+                currentUser.RefreshTokenExpireDate.Value.Month,
+                currentUser.RefreshTokenExpireDate.Value.Day,
+                currentUser.RefreshTokenExpireDate.Value.Hour,
+                currentUser.RefreshTokenExpireDate.Value.Minute - 5,
+                currentUser.RefreshTokenExpireDate.Value.Second);
+
+
+            if (accessTokenExpireDate < DateTime.Now && currentUser.RefreshTokenExpireDate > DateTime.Now)
+            {
+                AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
+                ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
+
+                refreshTokenResponseModel.Token.TokenBody = userTokens.Value;
+                refreshTokenResponseModel.Token.ExpireDate = userTokens.ExpireDate;
+                refreshTokenResponseModel.Token.RefreshToken = currentUser.RefreshToken;
+                refreshTokenResponseModel.Token.RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate;
+
+                return new SuccessDataResult<RefreshTokenResponseModel>(refreshTokenResponseModel);
+            }
+            else
+            {
+                return new ErrorDataResult<RefreshTokenResponseModel>("Token already useable.");
+            }
+        }
+
+        public async Task<IDataResult<RegisterResponseModel>> RegisterAdmin(RegisterModel registerModel)
+        {
+            RegisterResponseModel registerResponseModel = new RegisterResponseModel();
+
+            try
+            {
+                //if (!ModelState.IsValid)
+                //{
+                //    registerResponseModel.Status = false;
+                //    registerResponseModel.Message = "Try Again.";
+
+                //    return BadRequest(registerResponseModel);
+                //}
+
+                User existsUser = await _userManager.FindByEmailAsync(registerModel.Email);
+
+                if (existsUser != null)
+                {
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = "This user already exists.";
+
+                    return new ErrorDataResult<RegisterResponseModel>(registerResponseModel);
+                }
+
+                User user = new User();
+
+                user.UserName = registerModel.UserName;
+                user.Email = registerModel.Email;
+                user.EmailConfirmed = true;
+                user.FirstName = registerModel.FirstName;
+                user.LastName = registerModel.LastName;
+                user.PhoneNumberConfirmed = false;
+                user.TwoFactorEnabled = false;
+                user.LockoutEnabled = true;
+                user.AccessFailedCount = 0;
+
+
+                var result = await _userManager.CreateAsync(user, registerModel.Password.Trim());
+
+
+                if (result.Succeeded)
+                {
+                    bool roleExists1 = await _roleManager.RoleExistsAsync(_config["Roles:Admin"]);
+                    bool roleExists2 = await _roleManager.RoleExistsAsync(_config["Roles:User"]);
+
+                    if (!roleExists1)
+                    {
+                        IdentityRole role1 = new IdentityRole(_config["Roles:Admin"]);
+                        role1.NormalizedName = _config["Roles:Admin"];
+
+                        await _roleManager.CreateAsync(role1);
+                    }
+                    if (!roleExists2)
+                    {
+                        IdentityRole role2 = new IdentityRole(_config["Roles:User"]);
+                        role2.NormalizedName = _config["Roles:User"];
+
+                        await _roleManager.CreateAsync(role2);
+                    }
+
+                    await _userManager.AddToRoleAsync(user, _config["Roles:Admin"]);
+                    await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
+
+                    var currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
+                    ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
+
+                    //var authRoles = from role in _context.Roles
+                    //                join userRole in _context.UserRoles
+                    //                on role.Id equals userRole.RoleId
+                    //                where userRole.UserId == user.Id
+                    //                select new { RoleName = role.Name };
+
+                    //foreach (var item in authRoles)
+                    //{
+                    //    registerResponseModel.Roles.Add(item.RoleName);
+                    //};
+
+                    currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    //var authRoles = (await _userManager.GetRolesAsync(currentUser));
+
+                    registerResponseModel.Email = user.Email;
+                    registerResponseModel.UserName = user.UserName;
+                    registerResponseModel.UserId = user.Id;
+                    registerResponseModel.Token = new Token()
+                    {
+                        TokenBody = userTokens.Value,
+                        ExpireDate = userTokens.ExpireDate,
+                        RefreshToken = currentUser.RefreshToken,
+                        RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
+                    };
+                    registerResponseModel.FirstName = user.FirstName;
+                    registerResponseModel.LastName = user.LastName;
+                    registerResponseModel.Message = "User is created successfully";
+                    registerResponseModel.Status = true;
+                    registerResponseModel.Roles = (await _userManager.GetRolesAsync(currentUser)).ToList();
+
+
+                    return new SuccessDataResult<RegisterResponseModel>(registerResponseModel);
+                }
+                else
+                {
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = $"An error occured while user creating. {result.Errors.FirstOrDefault().Description}";
+                    return new ErrorDataResult<RegisterResponseModel>(registerResponseModel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                registerResponseModel.Status = false;
+                registerResponseModel.Message = ex.Message;
+
+                return new ErrorDataResult<RegisterResponseModel>(registerResponseModel);
+            }
+        }
+
+        public async Task<IDataResult<RegisterResponseModel>> RegisterUser(RegisterModel registerModel)
+        {
+            RegisterResponseModel registerResponseModel = new RegisterResponseModel();
+
+            try
+            {
+                //if (!ModelState.IsValid)
+                //{
+                //    registerResponseModel.Status = false;
+                //    registerResponseModel.Message = "Try Again.";
+
+                //    return BadRequest(registerResponseModel);
+                //}
+
+                User existsUser = await _userManager.FindByEmailAsync(registerModel.Email);
+
+                if (existsUser != null)
+                {
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = "This user already exists.";
+
+                    return new ErrorDataResult<RegisterResponseModel>(registerResponseModel);
+                }
+
+                User user = new User();
+
+                user.UserName = registerModel.UserName;
+                user.Email = registerModel.Email;
+                user.EmailConfirmed = true;
+                user.FirstName = registerModel.FirstName;
+                user.LastName = registerModel.LastName;
+                user.PhoneNumberConfirmed = false;
+                user.TwoFactorEnabled = false;
+                user.LockoutEnabled = true;
+                user.AccessFailedCount = 0;
+
+
+                var result = await _userManager.CreateAsync(user, registerModel.Password.Trim());
+
+
+                if (result.Succeeded)
+                {
+                    bool roleExists = await _roleManager.RoleExistsAsync(_config["Roles:User"]);
+
+
+                    if (!roleExists)
+                    {
+                        IdentityRole role = new IdentityRole(_config["Roles:User"]);
+                        role.NormalizedName = _config["Roles:User"];
+
+                        await _roleManager.CreateAsync(role);
+                    }
+
+                    await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
+
+                    var currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
+                    ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
+
+                    //var authRoles = from role in _context.Roles
+                    //                join userRole in _context.UserRoles
+                    //                on role.Id equals userRole.RoleId
+                    //                where userRole.UserId == user.Id
+                    //                select new { RoleName = role.Name };
+
+                    //foreach (var item in authRoles)
+                    //{
+                    //    registerResponseModel.Roles.Add(item.RoleName);
+                    //};
+
+                    currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    //var authRoles = (await _userManager.GetRolesAsync(currentUser));
+
+                    registerResponseModel.Email = user.Email;
+                    registerResponseModel.UserName = user.UserName;
+                    registerResponseModel.UserId = user.Id;
+                    registerResponseModel.Token = new Token()
+                    {
+                        TokenBody = userTokens.Value,
+                        ExpireDate = userTokens.ExpireDate,
+                        RefreshToken = currentUser.RefreshToken,
+                        RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
+                    };
+                    registerResponseModel.FirstName = user.FirstName;
+                    registerResponseModel.LastName = user.LastName;
+                    registerResponseModel.Message = "User is created successfully";
+                    registerResponseModel.Status = true;
+                    registerResponseModel.Roles = (await _userManager.GetRolesAsync(currentUser)).ToList();
+
+
+                    return new SuccessDataResult<RegisterResponseModel>(registerResponseModel);
+                }
+                else
+                {
+                    registerResponseModel.Status = false;
+                    registerResponseModel.Message = $"An error occured while user creating. {result.Errors.FirstOrDefault().Description}";
+                    return new ErrorDataResult<RegisterResponseModel>(registerResponseModel);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                registerResponseModel.Status = false;
+                registerResponseModel.Message = ex.Message;
+
+                return new ErrorDataResult<RegisterResponseModel>(registerResponseModel);
+            }
         }
 
         IDataResult<AuthMeResponseModel> IAuthorizationService.AuthMe(string token)
         {
             AuthMeResponseModel authMeResponseModel = new AuthMeResponseModel();
 
-            var roles = from usro in _context.UserRoles
-                        join to in _context.UserTokens
-                        on usro.UserId equals to.UserId
-                        join us in _context.Users
-                        on usro.UserId equals us.Id
-                        join ro in _context.Roles
-                        on usro.RoleId equals ro.Id
-                        where usro.UserId == us.Id
-                        select new { Roles = ro.Name };
+            var user = from tkn in _context.UserTokens
+                        join usr in _userManager.Users
+                        on tkn.UserId equals usr.Id
+                        where tkn.Value == token
+                        select usr ;
 
             List<string> roleList = new List<string>();
 
-            foreach (var item in roles)
+            foreach (var item in _userManager.GetRolesAsync(user.First()).Result.ToList())
             {
-                roleList.Add(item.Roles);
+                roleList.Add(item);
             }
 
             roleList = roleList.Distinct().ToList();
