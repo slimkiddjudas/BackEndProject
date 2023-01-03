@@ -68,9 +68,9 @@ namespace Business.Security
             tokenInfo.ExpireDate = expireDate;
             tokenInfo.RefreshToken = Guid.NewGuid().ToString();
 
-            _user.RefreshToken = tokenInfo.RefreshToken;
-            _user.RefreshTokenExpireDate = tokenInfo.ExpireDate.AddMinutes(5);
-            _context.SaveChanges();
+            _context.Users.Where(x => x.Id == _user.Id).First().RefreshToken = tokenInfo.RefreshToken;
+            _context.Users.Where(x => x.Id == _user.Id).First().RefreshTokenExpireDate = tokenInfo.ExpireDate.AddMinutes(5);
+            _context.SaveChangesAsync().Wait();
 
             return tokenInfo;
         }
@@ -82,7 +82,7 @@ namespace Business.Security
 
             if (_context.ApplicationUserTokens.Count(x => x.UserId == _user.Id) > 0)
             {
-                userTokens = _context.ApplicationUserTokens.FirstOrDefault(x => x.UserId == _user.Id);
+                userTokens = await _context.ApplicationUserTokens.FirstOrDefaultAsync(x => x.UserId == _user.Id);
 
                 if (userTokens.ExpireDate <= DateTime.Now)
                 {
@@ -108,7 +108,7 @@ namespace Business.Security
 
                 _context.ApplicationUserTokens.Add(userTokens);
             }
-            _context.SaveChangesAsync();
+            _context.SaveChangesAsync().Wait();
 
             return userTokens;
         }

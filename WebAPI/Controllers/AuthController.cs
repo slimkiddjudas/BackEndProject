@@ -195,7 +195,7 @@ namespace WebAPI.Controllers
                     await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
                     Console.WriteLine("7");
 
-                    User currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+                    var currentUser = await _userManager.FindByEmailAsync(user.Email);
                     Console.WriteLine("8");
                     AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
                     Console.WriteLine("9");
@@ -213,7 +213,8 @@ namespace WebAPI.Controllers
                     //    registerResponseModel.Roles.Add(item.RoleName);
                     //};
 
-                    var authRoles = await _userManager.GetRolesAsync(currentUser);
+                    currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    //var authRoles = (await _userManager.GetRolesAsync(currentUser));
 
                     Console.WriteLine("11");
 
@@ -232,7 +233,7 @@ namespace WebAPI.Controllers
                     registerResponseModel.LastName = user.LastName;
                     registerResponseModel.Message = "User is created successfully";
                     registerResponseModel.Status = true;
-                    registerResponseModel.Roles = authRoles.ToList();
+                    registerResponseModel.Roles = (await _userManager.GetRolesAsync(currentUser)).ToList();
                     Console.WriteLine("14");
 
 
