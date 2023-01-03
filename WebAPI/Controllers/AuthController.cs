@@ -100,18 +100,18 @@ namespace WebAPI.Controllers
                         IdentityRole role1 = new IdentityRole(_config["Roles:Admin"]);
                         role1.NormalizedName = _config["Roles:Admin"];
 
-                        _roleManager.CreateAsync(role1).Wait();
+                        await _roleManager.CreateAsync(role1);
                     }
                     if (!roleExists2)
                     {
                         IdentityRole role2 = new IdentityRole(_config["Roles:User"]);
                         role2.NormalizedName = _config["Roles:User"];
 
-                        _roleManager.CreateAsync(role2).Wait();
+                       await  _roleManager.CreateAsync(role2);
                     }
 
-                    _userManager.AddToRoleAsync(user, _config["Roles:Admin"]).Wait();
-                    _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
+                    await _userManager.AddToRoleAsync(user, _config["Roles:Admin"]);
+                    await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
 
                     return Ok(result);
                 }
@@ -136,6 +136,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] RegisterModel model)
         {
             RegisterResponseModel registerResponseModel = new RegisterResponseModel();
+            Console.WriteLine("1");
 
             try
             {
@@ -148,6 +149,7 @@ namespace WebAPI.Controllers
                 }
 
                 User existsUser = await _userManager.FindByEmailAsync(model.Email);
+                Console.WriteLine("2");
 
                 if (existsUser != null)
                 {
@@ -169,36 +171,52 @@ namespace WebAPI.Controllers
                 user.LockoutEnabled = true;
                 user.AccessFailedCount = 0;
 
+                Console.WriteLine("3");
+
                 var result = await _userManager.CreateAsync(user, model.Password.Trim());
+
+                Console.WriteLine("4");
 
                 if (result.Succeeded)
                 {
                     bool roleExists = await _roleManager.RoleExistsAsync(_config["Roles:User"]);
+
+                    Console.WriteLine("5");
 
                     if (!roleExists)
                     {
                         IdentityRole role = new IdentityRole(_config["Roles:User"]);
                         role.NormalizedName = _config["Roles:User"];
 
-                        _roleManager.CreateAsync(role).Wait();
+                        await _roleManager.CreateAsync(role);
+                        Console.WriteLine("6");
                     }
 
-                    _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
+                    await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
+                    Console.WriteLine("7");
 
-                    User currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+                    var currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    Console.WriteLine("8");
                     AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
-                    ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+                    Console.WriteLine("9");
+                    ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
+                    Console.WriteLine("10");
 
-                    var authRoles = from role in _context.Roles
-                                    join userRole in _context.UserRoles
-                                    on role.Id equals userRole.RoleId
-                                    where userRole.UserId == user.Id
-                                    select new { RoleName = role.Name };
+                    //var authRoles = from role in _context.Roles
+                    //                join userRole in _context.UserRoles
+                    //                on role.Id equals userRole.RoleId
+                    //                where userRole.UserId == user.Id
+                    //                select new { RoleName = role.Name };
 
-                    foreach (var item in authRoles)
-                    {
-                        registerResponseModel.Roles.Add(item.RoleName);
-                    };
+                    //foreach (var item in authRoles)
+                    //{
+                    //    registerResponseModel.Roles.Add(item.RoleName);
+                    //};
+
+                    currentUser = await _userManager.FindByEmailAsync(user.Email);
+                    //var authRoles = (await _userManager.GetRolesAsync(currentUser));
+
+                    Console.WriteLine("11");
 
                     registerResponseModel.Email = user.Email;
                     registerResponseModel.UserName = user.UserName;
@@ -210,10 +228,13 @@ namespace WebAPI.Controllers
                         RefreshToken = currentUser.RefreshToken,
                         RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
                     };
+                    Console.WriteLine("13");
                     registerResponseModel.FirstName = user.FirstName;
                     registerResponseModel.LastName = user.LastName;
                     registerResponseModel.Message = "User is created successfully";
                     registerResponseModel.Status = true;
+                    registerResponseModel.Roles = (await _userManager.GetRolesAsync(currentUser)).ToList();
+                    Console.WriteLine("14");
 
 
                     return Ok(registerResponseModel);
@@ -259,7 +280,7 @@ namespace WebAPI.Controllers
             if (accessTokenExpireDate < DateTime.Now  && currentUser.RefreshTokenExpireDate > DateTime.Now)
             {
                 AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
-                ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+                ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
 
                 return Ok(new Token()
                 {

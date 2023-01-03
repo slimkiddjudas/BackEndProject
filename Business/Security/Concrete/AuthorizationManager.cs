@@ -66,7 +66,7 @@ namespace Business.Security.Concrete
                 User currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
                 AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
 
-                ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+                ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
                 currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
 
 
