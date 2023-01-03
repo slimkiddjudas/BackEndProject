@@ -100,18 +100,18 @@ namespace WebAPI.Controllers
                         IdentityRole role1 = new IdentityRole(_config["Roles:Admin"]);
                         role1.NormalizedName = _config["Roles:Admin"];
 
-                        _roleManager.CreateAsync(role1).Wait();
+                        await _roleManager.CreateAsync(role1);
                     }
                     if (!roleExists2)
                     {
                         IdentityRole role2 = new IdentityRole(_config["Roles:User"]);
                         role2.NormalizedName = _config["Roles:User"];
 
-                        _roleManager.CreateAsync(role2).Wait();
+                       await  _roleManager.CreateAsync(role2);
                     }
 
-                    _userManager.AddToRoleAsync(user, _config["Roles:Admin"]).Wait();
-                    _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
+                    await _userManager.AddToRoleAsync(user, _config["Roles:Admin"]);
+                    await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
 
                     return Ok(result);
                 }
@@ -180,25 +180,27 @@ namespace WebAPI.Controllers
                         IdentityRole role = new IdentityRole(_config["Roles:User"]);
                         role.NormalizedName = _config["Roles:User"];
 
-                        _roleManager.CreateAsync(role).Wait();
+                        await _roleManager.CreateAsync(role);
                     }
 
-                    _userManager.AddToRoleAsync(user, _config["Roles:User"]).Wait();
+                    await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
 
                     User currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
                     AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
-                    ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+                    ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
 
-                    var authRoles = from role in _context.Roles
-                                    join userRole in _context.UserRoles
-                                    on role.Id equals userRole.RoleId
-                                    where userRole.UserId == user.Id
-                                    select new { RoleName = role.Name };
+                    //var authRoles = from role in _context.Roles
+                    //                join userRole in _context.UserRoles
+                    //                on role.Id equals userRole.RoleId
+                    //                where userRole.UserId == user.Id
+                    //                select new { RoleName = role.Name };
 
-                    foreach (var item in authRoles)
-                    {
-                        registerResponseModel.Roles.Add(item.RoleName);
-                    };
+                    //foreach (var item in authRoles)
+                    //{
+                    //    registerResponseModel.Roles.Add(item.RoleName);
+                    //};
+
+                    var authRoles = await _userManager.GetRolesAsync(currentUser);
 
                     registerResponseModel.Email = user.Email;
                     registerResponseModel.UserName = user.UserName;
@@ -214,6 +216,7 @@ namespace WebAPI.Controllers
                     registerResponseModel.LastName = user.LastName;
                     registerResponseModel.Message = "User is created successfully";
                     registerResponseModel.Status = true;
+                    registerResponseModel.Roles = authRoles.ToList();
 
 
                     return Ok(registerResponseModel);
@@ -259,7 +262,7 @@ namespace WebAPI.Controllers
             if (accessTokenExpireDate < DateTime.Now  && currentUser.RefreshTokenExpireDate > DateTime.Now)
             {
                 AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
-                ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
+                ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
 
                 return Ok(new Token()
                 {

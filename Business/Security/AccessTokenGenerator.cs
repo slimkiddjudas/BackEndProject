@@ -75,7 +75,7 @@ namespace Business.Security
             return tokenInfo;
         }
 
-        public ApplicationUserTokens GetToken()
+        public async Task<ApplicationUserTokens> GetToken()
         {
             ApplicationUserTokens userTokens = null;
             Token token = null;

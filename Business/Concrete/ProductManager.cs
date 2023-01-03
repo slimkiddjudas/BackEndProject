@@ -37,9 +37,9 @@ namespace Business.Concrete
             return new SuccessResult();
         }
 
-        public IResult Delete(Product product)
+        public IResult Delete(int id)
         {
-            _productDal.Delete(product);
+            _productDal.Delete(_productDal.Get(p => p.ProductId == id));
             return new SuccessResult();
         }
 
