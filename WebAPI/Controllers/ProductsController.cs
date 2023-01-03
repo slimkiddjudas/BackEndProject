@@ -132,6 +132,31 @@ namespace WebAPI.Controllers
             return BadRequest(result);
         }
 
+        [HttpPost("filter/{page}")]
+        public IActionResult FilterPage(int page, string name)
+        {
+            var firstIndex = (page - 1) * 20;
+            var result = _productService.FilterWithName(name);
+            List<Product> pageResult = null;
+
+            if (firstIndex + 20 > result.Data.Count)
+            {
+                var lastPageCount = result.Data.Count % 20;
+                pageResult = result.Data.GetRange(firstIndex, lastPageCount);
+            }
+            else
+            {
+                pageResult = result.Data.GetRange(firstIndex, 20);
+            }
+
+            if (result.IsSuccess)
+            {
+                return Ok(pageResult);
+            }
+
+            return BadRequest(result);
+        }
+
         [HttpGet("getproductswithdetails")]
         public IActionResult GetProductsWithDetails()
         {
