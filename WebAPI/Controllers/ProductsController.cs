@@ -139,6 +139,7 @@ namespace WebAPI.Controllers
             var result = _productService.FilterWithName(name);
             List<Product> pageResult = null;
 
+
             if (firstIndex + 20 > result.Data.Count)
             {
                 var lastPageCount = result.Data.Count % 20;
