@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Entity.Concrete;
+using Entity.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -150,6 +151,18 @@ namespace WebAPI.Controllers
             {
                 return Ok(result);
             }
+            return BadRequest(result);
+        }
+
+        [HttpPost("addwithdto")]
+        public IActionResult AddWithDto(ProductDetailDto product)
+        {
+            var result = _productService.AddWithDto(product);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+
             return BadRequest(result);
         }
     }

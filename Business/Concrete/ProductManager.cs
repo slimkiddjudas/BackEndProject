@@ -15,9 +15,11 @@ namespace Business.Concrete
     public class ProductManager : IProductService
     {
         private IProductDal _productDal;
-        public ProductManager(IProductDal productDal)
+        private IProductImageDal _productImageDal;
+        public ProductManager(IProductDal productDal, IProductImageDal productImageDal)
         {
             _productDal = productDal;
+            _productImageDal = productImageDal;
         }
 
         public IResult Add(Product product)
@@ -71,6 +73,32 @@ namespace Business.Concrete
         public IDataResult<ProductDetailDto> GetOneProductWithDetails(int id)
         {
             return new SuccessDataResult<ProductDetailDto>(_productDal.GetOneProductWithDetails(id));
+        }
+
+        public IResult AddWithDto(ProductDetailDto product)
+        {
+            var productToAdd = new Product
+            {
+                ProductId = 0,
+                CategoryId = 1,
+                ProductName = product.ProductName,
+                UnitPrice = product.UnitPrice,
+                UnitsInStock = product.UnitsInStock,
+                Description = product.Description
+            };
+            _productDal.Add(productToAdd);
+            var productId = GetAll().Data.Last().ProductId;
+            foreach (var productImageToAdd in product.ImageUrls.Select(productImageUrl => new ProductImage
+                     {
+                         ProductImageId = 0,
+                         ProductId = productId,
+                         ImageUrl = productImageUrl.ImageUrl
+                     }))
+            {
+                _productImageDal.Add(productImageToAdd);
+            }
+
+            return new SuccessResult();
         }
     }
 }

@@ -23,5 +23,6 @@ namespace Business.Abstract
         IDataResult<List<Product>> FilterWithName(string filter);
         IDataResult<List<ProductDetailDto>> GetProductsWithDetails();
         IDataResult<ProductDetailDto> GetOneProductWithDetails(int id);
+        IResult AddWithDto(ProductDetailDto product);
     }
 }

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Core.Entities;
 using Microsoft.AspNetCore.Http;
 
 namespace Entity.DTOs
 {
-    public class OrderDetailDto
+    public class OrderDetailDto : IDto
     {
         public string ProductName { get; set; }
         public string ProductDescription { get; set; }
