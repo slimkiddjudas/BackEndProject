@@ -100,8 +100,8 @@ namespace WebAPI.Controllers
         public IActionResult GetPage(int page)
         {
             var firstIndex = (page-1) * 20;
-            var result = _productService.GetAll();
-            List<Product> pageResult = null;
+            var result = _productService.GetProductsWithDetails();
+            List<ProductDetailDto> pageResult = null;
 
             if (firstIndex + 20 > result.Data.Count)
             {
