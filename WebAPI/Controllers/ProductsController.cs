@@ -86,9 +86,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("delete")]
-        public IActionResult Delete(Product product)
+        public IActionResult Delete(int id)
         {
-            var result = _productService.Delete(product);
+            var result = _productService.Delete(id);
             if (result.IsSuccess)
             {
                 return Ok(result);
