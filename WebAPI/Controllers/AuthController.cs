@@ -136,6 +136,7 @@ namespace WebAPI.Controllers
         public async Task<IActionResult> RegisterUser([FromBody] RegisterModel model)
         {
             RegisterResponseModel registerResponseModel = new RegisterResponseModel();
+            Console.WriteLine("1");
 
             try
             {
@@ -148,6 +149,7 @@ namespace WebAPI.Controllers
                 }
 
                 User existsUser = await _userManager.FindByEmailAsync(model.Email);
+                Console.WriteLine("2");
 
                 if (existsUser != null)
                 {
@@ -169,11 +171,17 @@ namespace WebAPI.Controllers
                 user.LockoutEnabled = true;
                 user.AccessFailedCount = 0;
 
+                Console.WriteLine("3");
+
                 var result = await _userManager.CreateAsync(user, model.Password.Trim());
+
+                Console.WriteLine("4");
 
                 if (result.Succeeded)
                 {
                     bool roleExists = await _roleManager.RoleExistsAsync(_config["Roles:User"]);
+
+                    Console.WriteLine("5");
 
                     if (!roleExists)
                     {
@@ -181,13 +189,18 @@ namespace WebAPI.Controllers
                         role.NormalizedName = _config["Roles:User"];
 
                         await _roleManager.CreateAsync(role);
+                        Console.WriteLine("6");
                     }
 
                     await _userManager.AddToRoleAsync(user, _config["Roles:User"]);
+                    Console.WriteLine("7");
 
                     User currentUser = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+                    Console.WriteLine("8");
                     AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
+                    Console.WriteLine("9");
                     ApplicationUserTokens userTokens = await accessTokenGenerator.GetToken();
+                    Console.WriteLine("10");
 
                     //var authRoles = from role in _context.Roles
                     //                join userRole in _context.UserRoles
@@ -202,6 +215,8 @@ namespace WebAPI.Controllers
 
                     var authRoles = await _userManager.GetRolesAsync(currentUser);
 
+                    Console.WriteLine("11");
+
                     registerResponseModel.Email = user.Email;
                     registerResponseModel.UserName = user.UserName;
                     registerResponseModel.UserId = user.Id;
@@ -212,11 +227,13 @@ namespace WebAPI.Controllers
                         RefreshToken = currentUser.RefreshToken,
                         RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
                     };
+                    Console.WriteLine("13");
                     registerResponseModel.FirstName = user.FirstName;
                     registerResponseModel.LastName = user.LastName;
                     registerResponseModel.Message = "User is created successfully";
                     registerResponseModel.Status = true;
                     registerResponseModel.Roles = authRoles.ToList();
+                    Console.WriteLine("14");
 
 
                     return Ok(registerResponseModel);
