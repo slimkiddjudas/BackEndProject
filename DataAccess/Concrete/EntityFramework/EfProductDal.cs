@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Core.DataAccess.EntityFramework;
+using Core.Entities;
 using DataAccess.Abstract;
 using Entity.Concrete;
 using Entity.DTOs;
@@ -12,7 +14,7 @@ namespace DataAccess.Concrete.EntityFramework
 {
     public class EfProductDal : EfEntityRepositoryBase<Product, ContextDb>, IProductDal
     {
-        public List<ProductDetailDto> GetProductsWithDetails()
+        public List<ProductDetailDto> GetProductsWithDetails(Expression<Func<ProductDetailDto, bool>> filter = null)
         {
             using (ContextDb context = new ContextDb())
             {
@@ -31,7 +33,7 @@ namespace DataAccess.Concrete.EntityFramework
                         ImageUrls= imagesList.Where(pi => pi.ProductId == product.ProductId).ToList(),
                         Description = product.Description
                     };
-                return result.ToList();
+                return filter == null ? result.ToList() : result.Where(filter).ToList();
             }
         }
 

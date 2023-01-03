@@ -20,7 +20,7 @@ namespace Business.Abstract
         IDataResult<Product> GetById(int id);
         IDataResult<List<Product>> GetByCategoryId(int id);
         IDataResult<List<Product>> GetByPrice(double minPrice, double maxPrice);
-        IDataResult<List<Product>> FilterWithName(string filter);
+        IDataResult<List<ProductDetailDto>> FilterWithName(string filter);
         IDataResult<List<ProductDetailDto>> GetProductsWithDetails();
         IDataResult<ProductDetailDto> GetOneProductWithDetails(int id);
         IResult AddWithDto(ProductDetailDto product);

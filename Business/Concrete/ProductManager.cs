@@ -63,9 +63,9 @@ namespace Business.Concrete
             return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.UnitPrice > minPrice && p.UnitPrice < maxPrice));
         }
 
-        public IDataResult<List<Product>> FilterWithName(string filter)
+        public IDataResult<List<ProductDetailDto>> FilterWithName(string filter)
         {
-            return new SuccessDataResult<List<Product>>(_productDal.GetAll(p => p.ProductName.Contains(filter)));
+            return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductsWithDetails(p => p.ProductName.Contains(filter)));
         }
 
         public IDataResult<List<ProductDetailDto>> GetProductsWithDetails()

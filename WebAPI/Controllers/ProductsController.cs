@@ -137,7 +137,7 @@ namespace WebAPI.Controllers
         {
             var firstIndex = (page - 1) * 20;
             var result = _productService.FilterWithName(name);
-            List<Product> pageResult = null;
+            List<ProductDetailDto> pageResult = null;
 
 
             if (firstIndex + 20 > result.Data.Count)
