@@ -7,6 +7,8 @@ using Autofac;
 using Autofac.Extras.DynamicProxy;
 using Business.Abstract;
 using Business.Concrete;
+using Business.Security.Abstract;
+using Business.Security.Concrete;
 using Castle.DynamicProxy;
 using Core.Utilities.Interceptors;
 using DataAccess.Abstract;
@@ -36,13 +38,15 @@ namespace Business.DependencyResolvers.Autofac
             builder.RegisterType<ProductImageManager>().As<IProductImageService>();
             builder.RegisterType<EfProductImageDal>().As<IProductImageDal>();
 
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            builder.RegisterType<AuthorizationManager>().As<IAuthorizationService>();
 
-            builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()
-                .EnableInterfaceInterceptors(new ProxyGenerationOptions()
-                {
-                    Selector = new AspectInterceptorSelector()
-                }).SingleInstance();
+            //var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+            //builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()
+            //    .EnableInterfaceInterceptors(new ProxyGenerationOptions()
+            //    {
+            //        Selector = new AspectInterceptorSelector()
+            //    }).SingleInstance();
         }
     }
 }

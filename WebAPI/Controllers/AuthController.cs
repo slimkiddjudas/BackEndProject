@@ -1,4 +1,6 @@
-﻿using Business.Security;
+﻿using Business.Abstract;
+using Business.Security;
+using Business.Security.Abstract;
 using Business.Security.Models;
 using DataAccess.Concrete.EntityFramework;
 using Entity.Concrete;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WebAPI.Controllers
 {
@@ -20,13 +23,16 @@ namespace WebAPI.Controllers
         private readonly ContextDb _context;
         private readonly IConfiguration _config;
 
-        public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ContextDb context, IConfiguration configuration)
+        private IAuthorizationService _authorizationService;
+
+        public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ContextDb context, IConfiguration configuration, IAuthorizationService authorizationService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _config = configuration;
             _context = context;
+            _authorizationService = authorizationService;
         }
 
         [HttpGet]
@@ -200,75 +206,9 @@ namespace WebAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            ResponseModel responseModel = new ResponseModel();
+            var result = await _authorizationService.Login(model);
 
-            try
-            {
-                if (ModelState.IsValid == false)
-                {
-                    responseModel.Status = false;
-                    responseModel.Message = "Try Again.";
-                    return BadRequest(responseModel);
-                }
-
-                User user = await _userManager.FindByEmailAsync(model.Email);
-
-                if (user == null)
-                {
-                    responseModel.Status = false;
-                    responseModel.Message = "Try Again.";
-                    return Unauthorized(responseModel);
-                }
-
-                Microsoft.AspNetCore.Identity.SignInResult signInResult = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
-
-                if (signInResult.Succeeded == false)
-                {
-                    responseModel.Status = false;
-                    responseModel.Message = "User name or password is incorrect.";
-
-                    return Unauthorized(responseModel);
-                }
-
-                User currentUser = _context.Users.FirstOrDefault(x => x.Id == user.Id);
-                AccessTokenGenerator accessTokenGenerator = new AccessTokenGenerator(_context, _config, currentUser);
-
-                ApplicationUserTokens userTokens = accessTokenGenerator.GetToken();
-
-
-                var authRoles = from role in _context.Roles
-                                join userRole in _context.UserRoles
-                                on role.Id equals userRole.RoleId
-                                where userRole.UserId == user.Id
-                                select new { RoleName = role.Name };
-
-                foreach (var item in authRoles)
-                {
-                    responseModel.Roles.Add(item.RoleName);
-                };
-
-                responseModel.Status = true;
-                responseModel.Message = "User is Logged in.";
-                responseModel.Token = new Token()
-                {
-                    TokenBody = userTokens.Value,
-                    ExpireDate = userTokens.ExpireDate,
-                    RefreshToken = currentUser.RefreshToken,
-                    RefreshTokenExpireDate = currentUser.RefreshTokenExpireDate
-                };
-                responseModel.UserId = user.Id;
-                responseModel.Email = model.Email;
-                
-
-                return Ok(responseModel);
-            }
-            catch (Exception ex)
-            {
-                responseModel.Status = false;
-                responseModel.Message = ex.Message;
-
-                return BadRequest(responseModel);
-            }
+            return Ok(result);
         }
 
         [HttpGet("refreshToken")]
@@ -305,39 +245,9 @@ namespace WebAPI.Controllers
         [HttpGet("authMe")]
         public async Task<IActionResult> AuthMe([FromHeader] string token)
         {
-            var roles = from usro in _context.UserRoles
-                        join to in _context.UserTokens
-                        on usro.UserId equals to.UserId
-                        join us in _context.Users
-                        on usro.UserId equals us.Id
-                        join ro in _context.Roles
-                        on usro.RoleId equals ro.Id
-                        where usro.UserId == us.Id
-                        select new { Roles = ro.Name };
+            var result = _authorizationService.AuthMe(token);
 
-            List<string> roleList = new List<string>();
-
-            foreach (var item in roles)
-            {
-                roleList.Add(item.Roles);
-            }
-
-            roleList = roleList.Distinct().ToList();
-
-            var user =  from u in _context.Users
-                            join t in _context.UserTokens
-                            on u.Id equals t.UserId
-                            where t.Value == token
-                            select new 
-                                {
-                                Id = u.Id,
-                                Email = u.Email,
-                                UserName = u.UserName,
-                                FirstName = u.FirstName,
-                                LastName = u.LastName,
-                                Roles = roleList
-                                };
-            return Ok(user.ToList()[0]);
+            return Ok(result);
         }
     }
 }
