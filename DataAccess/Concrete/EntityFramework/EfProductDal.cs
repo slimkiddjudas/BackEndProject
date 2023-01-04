@@ -25,7 +25,6 @@ namespace DataAccess.Concrete.EntityFramework
                     join category in context.Categories on product.CategoryId equals category.CategoryId
                     select new ProductDetailDto
                     {
-                        ProductId = product.ProductId,
                         ProductName = product.ProductName,
                         CategoryName = category.CategoryName,
                         UnitPrice = product.UnitPrice,
@@ -49,7 +48,6 @@ namespace DataAccess.Concrete.EntityFramework
                     where product.ProductId == id
                     select new ProductDetailDto
                     {
-                        ProductId = product.ProductId,
                         ProductName = product.ProductName,
                         CategoryName = category.CategoryName,
                         UnitPrice = product.UnitPrice,

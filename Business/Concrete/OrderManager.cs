@@ -56,5 +56,10 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<OrderDetailDto>>(_orderDal.GetOrderWithDetails(id));
         }
+
+        public IResult CreateOrder(OrderPostDto order)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
