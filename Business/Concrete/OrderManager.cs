@@ -87,5 +87,10 @@ namespace Business.Concrete
             return new SuccessResult();
 
         }
+
+        public IDataResult<List<OrderDto>> GetOrders()
+        {
+            return new SuccessDataResult<List<OrderDto>>(_orderDal.GetOrders());
+        }
     }
 }

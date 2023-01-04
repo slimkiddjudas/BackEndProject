@@ -47,5 +47,26 @@ namespace DataAccess.Concrete.EntityFramework
                 //    };
             }
         }
+
+        public List<OrderDto> GetOrders()
+        {
+            using (ContextDb context = new ContextDb())
+            {
+                var orders = from order in context.Orders
+                    //join orderDetail in context.OrderDetails on order.OrderId equals orderDetail.OrderId
+                    //join product in context.Products on orderDetail.ProductId equals product.ProductId
+                    join user in context.Users on order.UserId equals user.Id
+                    select new OrderDto
+                    {
+                        UserMail = user.Email,
+                        CustomerFirstName = order.CustomerFirstName,
+                        CustomerLastName = order.CustomerLastName,
+                        CustomerAddress = order.CustomerAddress,
+                        CustomerPhone = order.CustomerPhone,
+                        OrderDate = order.OrderDate
+                    };
+                return orders.ToList();
+            }
+        }
     }
 }

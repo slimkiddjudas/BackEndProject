@@ -12,5 +12,6 @@ namespace DataAccess.Abstract
     public interface IOrderDal : IEntityRepository<Order>
     {
         List<OrderDetailDto> GetOrderWithDetails(int id);
+        List<OrderDto> GetOrders();
     }
 }
