@@ -123,7 +123,7 @@ namespace Business.Concrete
                          ImageUrl = productImageUrl.ImageUrl
                      }))
             {
-                _productImageDal.Add(productImageToAdd);
+                _productImageDal.Update(productImageToAdd);
             }
 
             return new SuccessResult();
