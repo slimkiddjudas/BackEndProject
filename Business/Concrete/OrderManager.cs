@@ -92,5 +92,10 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<OrderDto>>(_orderDal.GetOrders());
         }
+
+        public IDataResult<List<OrderDto>> GetOrdersUser(string userId)
+        {
+            return new SuccessDataResult<List<OrderDto>>(_orderDal.GetOrders(o => o.UserId == userId));
+        }
     }
 }

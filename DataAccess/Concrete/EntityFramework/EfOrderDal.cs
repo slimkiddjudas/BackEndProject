@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Core.DataAccess.EntityFramework;
@@ -48,7 +49,7 @@ namespace DataAccess.Concrete.EntityFramework
             }
         }
 
-        public List<OrderDto> GetOrders()
+        public List<OrderDto> GetOrders(Expression<Func<OrderDto, bool>> filter = null)
         {
             using (ContextDb context = new ContextDb())
             {
@@ -58,6 +59,7 @@ namespace DataAccess.Concrete.EntityFramework
                     join user in context.Users on order.UserId equals user.Id
                     select new OrderDto
                     {
+                        UserId = user.Id,
                         UserMail = user.Email,
                         CustomerFirstName = order.CustomerFirstName,
                         CustomerLastName = order.CustomerLastName,
@@ -65,7 +67,7 @@ namespace DataAccess.Concrete.EntityFramework
                         CustomerPhone = order.CustomerPhone,
                         OrderDate = order.OrderDate
                     };
-                return orders.ToList();
+                return filter==null ? orders.ToList() : orders.Where(filter).ToList();
             }
         }
     }

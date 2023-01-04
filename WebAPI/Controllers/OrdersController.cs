@@ -99,5 +99,17 @@ namespace WebAPI.Controllers
             }
             return BadRequest(result);
         }
+
+        [HttpGet("getordersuser")]
+        public IActionResult GetOrdersUser()
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = _orderService.GetOrdersUser(userId);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }
