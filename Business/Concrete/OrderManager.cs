@@ -14,9 +14,11 @@ namespace Business.Concrete
     public class OrderManager : IOrderService
     {
         private IOrderDal _orderDal;
-        public OrderManager(IOrderDal orderDal)
+        private IOrderDetailDal _orderDetailDal;
+        public OrderManager(IOrderDal orderDal, IOrderDetailDal orderDetailDal)
         {
             _orderDal = orderDal;
+            _orderDetailDal = orderDetailDal;
         }
 
         public IResult Add(Order order)
@@ -59,7 +61,31 @@ namespace Business.Concrete
 
         public IResult CreateOrder(OrderPostDto order)
         {
-            throw new NotImplementedException();
+            var orderToAdd = new Order
+            {
+                OrderId = 0,
+                UserId = 0,
+                CustomerFirstName = order.CustomerFirstName,
+                CustomerLastName = order.CustomerLastName,
+                CustomerAddress = order.CustomerAddress,
+                CustomerPhone = order.CustomerPhone,
+                OrderDate = order.OrderDate
+            };
+            _orderDal.Add(orderToAdd);
+            var orderId = _orderDal.GetAll().Last().OrderId;
+            foreach (var orderDetailToAdd in order.OrderDetails.Select(orderDetail => new OrderDetail
+                     {
+                         OrderDetailId = 0,
+                         OrderId = orderId,
+                         ProductId = orderDetail.ProductId,
+                         Quantity = orderDetail.Quantity,
+                     }))
+            {
+                _orderDetailDal.Add(orderDetailToAdd);
+            }
+
+            return new SuccessResult();
+
         }
     }
 }

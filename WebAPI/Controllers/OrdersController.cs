@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Entity.Concrete;
+using Entity.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,6 +71,18 @@ namespace WebAPI.Controllers
             {
                 return Ok(result);
             }
+            return BadRequest(result);
+        }
+
+        [HttpPost("createorder")]
+        public IActionResult CreateOrder(OrderPostDto order)
+        {
+            var result = _orderService.CreateOrder(order);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+
             return BadRequest(result);
         }
     }

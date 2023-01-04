@@ -11,6 +11,10 @@ namespace Entity.Concrete
     {
         public int OrderId { get; set; }
         public int UserId { get; set; }
+        public string CustomerFirstName { get; set; }
+        public string CustomerLastName { get; set; }
+        public string CustomerAddress { get; set; }
+        public string CustomerPhone { get; set; }
         public DateTime OrderDate { get; set; }
     }
 }
