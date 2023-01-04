@@ -44,7 +44,7 @@ namespace Business.Concrete
             return new SuccessDataResult<List<Order>>(_orderDal.GetAll());
         }
 
-        public IDataResult<List<Order>> GetByUserId(int id)
+        public IDataResult<List<Order>> GetByUserId(string id)
         {
             return new SuccessDataResult<List<Order>>(_orderDal.GetAll(o => o.UserId == id));
         }
@@ -64,12 +64,12 @@ namespace Business.Concrete
             var orderToAdd = new Order
             {
                 OrderId = 0,
-                UserId = 0,
+                UserId = order.UserId,
                 CustomerFirstName = order.CustomerFirstName,
                 CustomerLastName = order.CustomerLastName,
                 CustomerAddress = order.CustomerAddress,
                 CustomerPhone = order.CustomerPhone,
-                OrderDate = order.OrderDate
+                OrderDate = DateTime.Now
             };
             _orderDal.Add(orderToAdd);
             var orderId = _orderDal.GetAll().Last().OrderId;

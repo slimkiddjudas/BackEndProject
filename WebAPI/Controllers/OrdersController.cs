@@ -1,4 +1,5 @@
-﻿using Business.Abstract;
+﻿using System.Security.Claims;
+using Business.Abstract;
 using Entity.Concrete;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("getbyuserid/{id}")]
-        public IActionResult GetByUserId(int id)
+        public IActionResult GetByUserId(string id)
         {
             var result = _orderService.GetByUserId(id);
             if (result.IsSuccess)
@@ -77,6 +78,8 @@ namespace WebAPI.Controllers
         [HttpPost("createorder")]
         public IActionResult CreateOrder(OrderPostDto order)
         {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            order.UserId = userId;
             var result = _orderService.CreateOrder(order);
             if (result.IsSuccess)
             {
