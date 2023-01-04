@@ -116,13 +116,13 @@ namespace Business.Concrete
                 Description = product.Description
             };
             _productDal.Update(productToUpdate);
+            var imagesToDelete = _productImageDal.GetAll(pi => pi.ProductId == product.ProductId);
+            foreach (var img in imagesToDelete)
+            {
+                _productImageDal.Delete(img);
+            }
             foreach (var productImageUrl in product.ImageUrls)
             {
-                var imagesToDelete = _productImageDal.GetAll(pi => pi.ProductId == product.ProductId);
-                foreach (var img in imagesToDelete)
-                {
-                    _productImageDal.Delete(img);
-                }
                 var productImageToAdd = new ProductImage
                 {
                     ProductImageId = 0, 
