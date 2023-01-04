@@ -74,7 +74,7 @@ namespace WebAPI.Controllers
             return BadRequest(result);
         }
 
-        [HttpPost("update")]
+        [HttpPut("update")]
         public IActionResult Update(Product product)
         {
             var result = _productService.Update(product);
