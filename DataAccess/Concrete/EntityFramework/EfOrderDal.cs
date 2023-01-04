@@ -59,6 +59,7 @@ namespace DataAccess.Concrete.EntityFramework
                     join user in context.Users on order.UserId equals user.Id
                     select new OrderDto
                     {
+                        OrderId = order.OrderId,
                         UserId = user.Id,
                         UserMail = user.Email,
                         CustomerFirstName = order.CustomerFirstName,

@@ -9,6 +9,7 @@ namespace Entity.DTOs
 {
     public class OrderDto : IDto
     {
+        public int OrderId { get; set; }
         public string UserId { get; set; }
         public string UserMail { get; set; }
         public string CustomerFirstName { get; set; }
