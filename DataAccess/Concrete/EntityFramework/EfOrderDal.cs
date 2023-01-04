@@ -18,14 +18,18 @@ namespace DataAccess.Concrete.EntityFramework
             using (ContextDb context = new ContextDb())
             {
                 //var orderDetails = context.OrderDetails.Where(od => od.OrderId == id).ToList();
-
-
                 var orderWithDetails = from orderDetail in context.OrderDetails
                     join order in context.Orders on orderDetail.OrderId equals order.OrderId
+                    join user in context.Users on order.UserId equals user.Id
                     join product in context.Products on orderDetail.ProductId equals product.ProductId
                     where orderDetail.OrderId == id
                     select new OrderDetailDto
                     {
+                        CustomerFirstName = order.CustomerFirstName,
+                        CustomerLastName = order.CustomerLastName,
+                        CustomerAddress = order.CustomerAddress,
+                        UserMail = user.Email,
+                        CustomerPhone = order.CustomerPhone,
                         ProductName = product.ProductName,
                         ProductDescription = product.Description,
                         Quantity = orderDetail.Quantity,
