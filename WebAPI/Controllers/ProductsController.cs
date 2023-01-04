@@ -202,5 +202,16 @@ namespace WebAPI.Controllers
             }
             return BadRequest(result);
         }
+
+        [HttpGet("getlastproducts")]
+        public IActionResult GetLastProducts(int number)
+        {
+            var result = _productService.GetLastProducts(number);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }

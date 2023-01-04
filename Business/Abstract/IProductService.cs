@@ -25,5 +25,6 @@ namespace Business.Abstract
         IDataResult<ProductDetailDto> GetOneProductWithDetails(int id);
         IResult AddWithDto(ProductDetailDto product);
         IResult UpdateWithDto(ProductDetailDto product);
+        IDataResult<List<ProductDetailDto>> GetLastProducts(int number);
     }
 }

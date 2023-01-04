@@ -134,5 +134,12 @@ namespace Business.Concrete
 
             return new SuccessResult();
         }
+
+        public IDataResult<List<ProductDetailDto>> GetLastProducts(int number)
+        {
+            var products = _productDal.GetProductsWithDetails();
+            return new SuccessDataResult<List<ProductDetailDto>>(products.Skip(Math.Max(0, products.Count - number))
+                .Take(number).ToList());
+        }
     }
 }
