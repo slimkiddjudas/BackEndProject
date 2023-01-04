@@ -78,7 +78,7 @@ namespace Business.Concrete
             return new SuccessDataResult<ProductDetailDto>(_productDal.GetOneProductWithDetails(id));
         }
 
-        public IResult AddWithDto(ProductDetailDto product)
+        public IResult AddWithDto(ProductPostDto product)
         {
             var productToAdd = new Product
             {
@@ -104,7 +104,7 @@ namespace Business.Concrete
             return new SuccessResult();
         }
 
-        public IResult UpdateWithDto(ProductDetailDto product)
+        public IResult UpdateWithDto(ProductPostDto product)
         {
             var productToUpdate = new Product
             {

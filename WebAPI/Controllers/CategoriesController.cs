@@ -48,10 +48,21 @@ namespace WebAPI.Controllers
             return BadRequest(result);
         }
 
-        [HttpPost("update")]
+        [HttpPut("update")]
         public ActionResult UpdateCategory(Category category)
         {
             var result = _categoryService.Update(category);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpDelete("delete")]
+        public ActionResult DeleteCategory(Category category)
+        {
+            var result = _categoryService.Delete(category);
             if (result.IsSuccess)
             {
                 return Ok(result);

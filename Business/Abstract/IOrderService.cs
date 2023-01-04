@@ -18,5 +18,6 @@ namespace Business.Abstract
         IDataResult<List<Order>> GetByUserId(int id);
         IDataResult<Order> GetById(int id);
         IDataResult<List<OrderDetailDto>> GetOrderWithDetails(int id);
+        IResult CreateOrder(OrderPostDto order);
     }
 }

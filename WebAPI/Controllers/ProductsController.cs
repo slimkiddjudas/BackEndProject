@@ -181,7 +181,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("addwithdto")]
-        public IActionResult AddWithDto(ProductDetailDto product)
+        public IActionResult AddWithDto(ProductPostDto product)
         {
             var result = _productService.AddWithDto(product);
             if (result.IsSuccess)
@@ -193,7 +193,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPut("updatewithdto")]
-        public IActionResult UpdateWithDto(ProductDetailDto product)
+        public IActionResult UpdateWithDto(ProductPostDto product)
         {
             var result = _productService.UpdateWithDto(product);
             if (result.IsSuccess)
