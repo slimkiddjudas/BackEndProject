@@ -18,10 +18,12 @@ namespace Business.Concrete
     {
         private IProductDal _productDal;
         private IProductImageDal _productImageDal;
-        public ProductManager(IProductDal productDal, IProductImageDal productImageDal)
+        private IProductImageService _productImageService;
+        public ProductManager(IProductDal productDal, IProductImageDal productImageDal, IProductImageService productImageService)
         {
             _productDal = productDal;
             _productImageDal = productImageDal;
+            _productImageService = productImageService;
         }
 
         [ValidationAspect(typeof(ProductValidator))]
@@ -116,13 +118,14 @@ namespace Business.Concrete
                 Description = product.Description
             };
             _productDal.Update(productToUpdate);
-            foreach (var productImageToAdd in product.ImageUrls.Select(productImageUrl => new ProductImage
-                     {
-                         ProductImageId = 0,
-                         ProductId = product.ProductId,
-                         ImageUrl = productImageUrl.ImageUrl
-                     }))
+            foreach (var productImageUrl in product.ImageUrls)
             {
+                var imagesToDelete = _productImageService.GetByProductId(product.ProductId);
+                foreach (var img in imagesToDelete.Data)
+                {
+                    _productImageService.Delete(img);
+                }
+                var productImageToAdd = new ProductImage { ProductImageId = 0, ProductId = product.ProductId, ImageUrl = productImageUrl.ImageUrl };
                 _productImageDal.Update(productImageToAdd);
             }
 
