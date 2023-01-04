@@ -103,5 +103,30 @@ namespace Business.Concrete
 
             return new SuccessResult();
         }
+
+        public IResult UpdateWithDto(ProductDetailDto product)
+        {
+            var productToUpdate = new Product
+            {
+                ProductId = product.ProductId,
+                CategoryId = 1,
+                ProductName = product.ProductName,
+                UnitPrice = product.UnitPrice,
+                UnitsInStock = product.UnitsInStock,
+                Description = product.Description
+            };
+            _productDal.Update(productToUpdate);
+            foreach (var productImageToAdd in product.ImageUrls.Select(productImageUrl => new ProductImage
+                     {
+                         ProductImageId = 0,
+                         ProductId = product.ProductId,
+                         ImageUrl = productImageUrl.ImageUrl
+                     }))
+            {
+                _productImageDal.Add(productImageToAdd);
+            }
+
+            return new SuccessResult();
+        }
     }
 }

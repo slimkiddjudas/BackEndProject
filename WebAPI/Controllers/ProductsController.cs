@@ -191,5 +191,16 @@ namespace WebAPI.Controllers
 
             return BadRequest(result);
         }
+
+        [HttpPut("updatewithdto")]
+        public IActionResult UpdateWithDto(ProductDetailDto product)
+        {
+            var result = _productService.UpdateWithDto(product);
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }
