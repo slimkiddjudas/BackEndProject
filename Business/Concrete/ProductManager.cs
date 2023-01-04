@@ -126,7 +126,7 @@ namespace Business.Concrete
                     _productImageService.Delete(img);
                 }
                 var productImageToAdd = new ProductImage { ProductImageId = 0, ProductId = product.ProductId, ImageUrl = productImageUrl.ImageUrl };
-                _productImageDal.Update(productImageToAdd);
+                _productImageDal.Add(productImageToAdd);
             }
 
             return new SuccessResult();
