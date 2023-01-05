@@ -83,7 +83,7 @@ namespace Business.Concrete
             var productToAdd = new Product
             {
                 ProductId = 0,
-                CategoryId = 3,
+                CategoryId = 1,
                 ProductName = product.ProductName,
                 UnitPrice = product.UnitPrice,
                 UnitsInStock = product.UnitsInStock,
@@ -109,7 +109,7 @@ namespace Business.Concrete
             var productToUpdate = new Product
             {
                 ProductId = product.ProductId,
-                CategoryId = 3,
+                CategoryId = 1,
                 ProductName = product.ProductName,
                 UnitPrice = product.UnitPrice,
                 UnitsInStock = product.UnitsInStock,

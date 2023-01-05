@@ -22,12 +22,10 @@ namespace DataAccess.Concrete.EntityFramework
                     join productImage in context.ProductImages on product.ProductId equals productImage.ProductId
                     select productImage;
                 var result = from product in context.Products
-                    join category in context.Categories on product.CategoryId equals category.CategoryId
                     select new ProductDetailDto
                     {
                         ProductId = product.ProductId,
                         ProductName = product.ProductName,
-                        CategoryName = category.CategoryName,
                         UnitPrice = product.UnitPrice,
                         UnitsInStock = product.UnitsInStock,
                         ImageUrls= imagesList.Where(pi => pi.ProductId == product.ProductId).ToList(),
@@ -45,13 +43,11 @@ namespace DataAccess.Concrete.EntityFramework
                     where productImage.ProductId == id
                     select productImage;
                 var result = from product in context.Products
-                    join category in context.Categories on product.CategoryId equals category.CategoryId
                     where product.ProductId == id
                     select new ProductDetailDto
                     {
                         ProductId = product.ProductId,
                         ProductName = product.ProductName,
-                        CategoryName = category.CategoryName,
                         UnitPrice = product.UnitPrice,
                         UnitsInStock = product.UnitsInStock,
                         ImageUrls = imagesList.ToList(),
